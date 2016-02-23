@@ -12,7 +12,8 @@ public class Event implements Comparable<Event>
 
     }
 
-    public Event(double time_stamp){
+    public Event(double time_stamp)
+    {
         this.time_stamp = time_stamp;
     }
 
@@ -24,12 +25,6 @@ public class Event implements Comparable<Event>
             return -1;
         else
             return 0;
-    }
-
-    public boolean greater(Event o2)
-    {
-        int comp = compareTo(o2);
-        return comp == 1;
     }
 
     public double getTimeStamp()

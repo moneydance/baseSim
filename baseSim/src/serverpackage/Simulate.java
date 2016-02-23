@@ -3,7 +3,12 @@ package serverpackage;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class Simulate
+interface SimulateInterface
+{
+    public void run();
+}
+
+public class Simulate implements SimulateInterface
 {
     private long seed;
     private PriorityQueue<Event> calander;
@@ -14,9 +19,8 @@ public class Simulate
     public static double CLOCK;
     public static double LAMBDA;
     public static double MU;
-   // private final int HEAP_SIZE = 1000;
 
-    public Simulate(long seed, double lambda, double mu, double max_time)
+    public Simulate(long seed, double lambda, double ts, double max_time)
     {
         calander = new PriorityQueue<Event>();
         server = new Server();
@@ -25,7 +29,7 @@ public class Simulate
         this.seed = seed;
         last_event_time = 0;
         stats = new Statistics();
-        MU = mu;
+        MU = 1.0/ts;
         LAMBDA = lambda;
         Drand48.set(this.seed);
     }
@@ -43,7 +47,7 @@ public class Simulate
         stats.printStats();
     }
 
-    public void resolveEvent(Event current_event)
+    private void resolveEvent(Event current_event)
     {
         double diff = CLOCK - last_event_time;
         int queue_length = server.getQueueLength();
@@ -69,8 +73,9 @@ public class Simulate
             calander.add(event);
     }
 
-    public static void main (String[] args) {
-        Simulate sim1 = new Simulate(1234, 60, 66.66, 300.0);
+    public static void main (String[] args)
+    {
+        Simulate sim1 = new Simulate(1234, 60, .015, 1000000);
         sim1.run();
     }
 }
