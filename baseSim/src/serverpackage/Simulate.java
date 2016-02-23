@@ -75,7 +75,7 @@ public class Simulate implements SimulateInterface
 
     public static void main (String[] args)
     {
-        Simulate sim1 = new Simulate(1234, 60, .015, 1000000);
+        Simulate sim1 = new Simulate(1234, 60, .015, 10000);
         sim1.run();
     }
 }
