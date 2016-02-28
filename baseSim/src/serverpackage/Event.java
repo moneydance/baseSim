@@ -1,21 +1,13 @@
 package serverpackage;
 
 import java.lang.Math;
+import java.util.Random;
 
-public class Event implements Comparable<Event>
+
+public abstract class Event implements Comparable<Event>
 {
     protected double time_stamp;
     protected Task task;
-
-    public Event()
-    {
-
-    }
-
-    public Event(double time_stamp)
-    {
-        this.time_stamp = time_stamp;
-    }
 
     public int compareTo(Event o2)
     {
@@ -39,7 +31,8 @@ public class Event implements Comparable<Event>
 
     protected static double genTimeStamp(double lambda)
     {
-        double Y = Drand48.nextDouble();
+        Random RandomGenerator = new Random();
+        double Y = RandomGenerator.nextDouble();
         double x = (- Math.log(1.0-Y))/lambda;
         return x;
     }

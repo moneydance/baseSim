@@ -1,46 +1,54 @@
 package serverpackage;
 
-public class Statistics {
-    private int checks;
-    private double mean_queue_length;
-    private double mean_queue_time;
-    private double mean_system_time;
-    private double mean_system_length;
-    private double total_service_time;
+import java.io.File;
+import java.io.PrintStream;
+import java.io.FileOutputStream;
 
-    public Statistics()
-    {
-        checks = 0;
-        mean_queue_length = 0.0;
-        mean_queue_time = 0.0;
-        mean_system_time = 0.0;
-        mean_system_length = 0.0;
-        total_service_time = 0.0;
+public abstract class Statistics
+{
+    protected int monitor_event_count;
+    private PrintStream print_out_stream;
+    private PrintStream log_out_stream;
+
+    public Statistics(String server_type){
+        String file_path = "logs/" + server_type + "Log.txt";
+        File old_file = new File(file_path);
+        if (old_file.exists())
+            old_file.delete();
+        File new_file =new File(file_path);;
+        print_out_stream = System.out;
+        try
+        {
+            new_file.createNewFile();
+            log_out_stream = new PrintStream(new FileOutputStream(file_path, true));
+        }
+        catch (Exception ex){
+            System.out.println(ex);
+        }
     }
 
-    public void recordTimes(Task task)
+    abstract public void recordTimes(Task task);
+    abstract public void recordLengths(int queue_length, int system_length);
+    abstract public void printStats();
+
+    public void writeStats()
     {
-        double wait_time = task.getWaitTime();
-        double service_time = task.getServiceTime();
-        double total_time = service_time + wait_time;
-        mean_system_time +=  total_time;
-        mean_queue_time += wait_time;
-        total_service_time += service_time;
-        checks++;
+        System.setOut(log_out_stream);
+        System.out.println("Monitor Event Number: " + monitor_event_count);
+        printStats();
+        System.setOut(print_out_stream);
     }
 
-    public void recordLengths(int queue_length, int system_length, double time)
+    protected double computeStdev(double values, double values_pow2, int count)
     {
-        mean_queue_length += queue_length * time;
-        mean_system_length += system_length * time;
+        double mean = values/count;
+        double mean_pow2 = values_pow2/(double)count;
+        double var = mean_pow2 - Math.pow(mean, 2);
+        return Math.sqrt(var);
     }
 
-    public void printStats()
+    protected double confidenceInterval(double std, double z_score, int samples)
     {
-        System.out.println("W: " + mean_queue_length/Simulate.CLOCK);
-        System.out.println("Q: " + mean_system_length/Simulate.CLOCK);
-        System.out.println("Wt: " + mean_queue_time/checks);
-        System.out.println("Qt: " + mean_system_time/checks);
-        System.out.println("Rho: " + total_service_time/Simulate.CLOCK);
+        return z_score * (std/Math.sqrt(samples));
     }
 }

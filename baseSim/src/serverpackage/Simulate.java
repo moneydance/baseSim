@@ -10,60 +10,71 @@ interface SimulateInterface
 
 public class Simulate implements SimulateInterface
 {
-    private long seed;
     private PriorityQueue<Event> calander;
     private double max_time;
     private Server server;
-    private double last_event_time;
     private Statistics stats;
+    public static long SEED;
     public static double CLOCK;
     public static double LAMBDA;
+    public static double MONITOR_RATE;
     public static double MU;
 
-    public Simulate(long seed, double lambda, double ts, double max_time)
+    public Simulate(long seed, double lambda, double ts, double max_time, Server server, Statistics stats)
     {
-        calander = new PriorityQueue<Event>();
-        server = new Server();
         CLOCK = 0.0;
-        this.max_time = max_time;
-        this.seed = seed;
-        last_event_time = 0;
-        stats = new Statistics();
-        MU = 1.0/ts;
+        MU = 1/ts;
         LAMBDA = lambda;
-        Drand48.set(this.seed);
+        MONITOR_RATE = lambda * .2;
+        SEED = seed;
+        calander = new PriorityQueue<Event>();
+        this.server = server;
+        this.max_time = max_time;
+        this.stats = stats;
     }
 
     public void run()
     {
         calander.add(new EventBirth());
+        Boolean collect_stats = false;
         while(CLOCK<max_time)
         {
             Event current_event = calander.poll();
             CLOCK = current_event.getTimeStamp();
-            resolveEvent(current_event);
-            last_event_time = CLOCK;
+            resolveEvent(current_event, collect_stats);
+        }
+        collect_stats = true;
+        calander.add(new EventMonitor());
+        while(CLOCK<2*max_time)
+        {
+            Event current_event = calander.poll();
+            CLOCK = current_event.getTimeStamp();
+            resolveEvent(current_event, collect_stats);
         }
         stats.printStats();
     }
 
-    private void resolveEvent(Event current_event)
+    private void resolveEvent(Event current_event, Boolean collect_stats)
     {
-        double diff = CLOCK - last_event_time;
-        int queue_length = server.getQueueLength();
-        int system_length = server.getSystemLength();
-        stats.recordLengths(queue_length, system_length, diff);
         if (current_event instanceof EventBirth)
         {
            List<Event> new_events = server.arrival(current_event);
            addEvents(new_events);
         }
         else if (current_event instanceof EventDeath)
-        {
-            stats.recordTimes(current_event.task);
+        {   if (collect_stats)
+                stats.recordTimes(current_event.task);
             EventDeath new_death_event = server.departure();
             if (new_death_event != null)
                 calander.add(new_death_event);
+        }
+        else if (current_event instanceof EventMonitor)
+        {
+            int queue_length = server.getQueueLength();
+            int system_length = server.getSystemLength();
+            stats.recordLengths(queue_length, system_length);
+            calander.add(new EventMonitor());
+            stats.writeStats();
         }
     }
 
@@ -71,11 +82,5 @@ public class Simulate implements SimulateInterface
     {
         for (Event event : new_events)
             calander.add(event);
-    }
-
-    public static void main (String[] args)
-    {
-        Simulate sim1 = new Simulate(1234, 60, .015, 10000);
-        sim1.run();
     }
 }
