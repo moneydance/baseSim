@@ -9,8 +9,11 @@ public abstract class Statistics
     protected int monitor_event_count;
     private PrintStream print_out_stream;
     private PrintStream log_out_stream;
+    private boolean collect_logs;
 
-    public Statistics(String server_type){
+    public Statistics(String server_type, boolean collect_logs){
+        monitor_event_count = 0;
+        this.collect_logs = collect_logs;
         String file_path = "logs/" + server_type + "Log.txt";
         File old_file = new File(file_path);
         if (old_file.exists())
@@ -29,14 +32,17 @@ public abstract class Statistics
 
     abstract public void recordTimes(Task task);
     abstract public void recordLengths(int queue_length, int system_length);
-    abstract public void printStats();
+    abstract public void printStats(double clock);
 
-    public void writeStats()
+    public void writeStats(double clock)
     {
-        //System.setOut(log_out_stream);
-       // System.out.println("Monitor Event Number: " + monitor_event_count);
-        //printStats();
-       // System.setOut(print_out_stream);
+        if (collect_logs)
+        {
+        System.setOut(log_out_stream);
+        System.out.println("Monitor Event Number: " + monitor_event_count);
+        printStats(clock);
+        System.setOut(print_out_stream);
+        }
     }
 
     protected double computeStdev(double values, double values_pow2, int count)

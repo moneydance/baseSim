@@ -15,9 +15,9 @@ public class Task {
         this.service_time = service_time;
     }
 
-    public void updateWaitTime()
+    public void updateWaitTime(double clock)
     {
-        this.wait_time = Simulate.CLOCK - arrival_time;
+        this.wait_time = clock - arrival_time;
     }
 
     public double getServiceTime()

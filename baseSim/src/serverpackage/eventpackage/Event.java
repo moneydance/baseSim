@@ -1,5 +1,6 @@
-package serverpackage;
+package serverpackage.eventpackage;
 
+import serverpackage.Task;
 import java.lang.Math;
 import java.util.Random;
 
@@ -29,7 +30,7 @@ public abstract class Event implements Comparable<Event>
         return task;
     }
 
-    protected static double genTimeStamp(double lambda)
+    public static double nextExponential(double lambda)
     {
         Random RandomGenerator = new Random();
         double Y = RandomGenerator.nextDouble();

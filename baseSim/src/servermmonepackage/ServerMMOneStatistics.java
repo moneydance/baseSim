@@ -17,11 +17,10 @@ public class ServerMMOneStatistics extends Statistics
     private double total_service_time;
     private double z_score;
 
-    public ServerMMOneStatistics(String server_type)
+    public ServerMMOneStatistics(String server_type, boolean collect_logs)
     {
-        super(server_type);
+        super(server_type, collect_logs);
         death_event_count = 0;
-        monitor_event_count = 0;
         mean_queue_length = 0.0;
         mean_queue_time = 0.0;
         mean_system_time = 0.0;
@@ -56,15 +55,15 @@ public class ServerMMOneStatistics extends Statistics
         monitor_event_count++;
     }
 
-    public void printStats()
+    public void printStats(double clock)
     {
         System.out.println("===================================================");
-        System.out.println("CLOCK: " + Simulate.CLOCK/2);
+        System.out.println("CLOCK: " + clock/2);
         System.out.println("W: " + mean_queue_length/(double)monitor_event_count);
         System.out.println("Q: " + mean_system_length/(double)monitor_event_count);
         System.out.println("Wt: " + mean_queue_time/death_event_count);
         System.out.println("Qt: " + mean_system_time/death_event_count);
-        System.out.println("Rho: " + total_service_time/(Simulate.CLOCK/2.0));
+        System.out.println("Rho: " + total_service_time/(clock/2.0));
         double w_stdev = computeStdev((double)mean_queue_length, (double)mean_queue_length_pow2, monitor_event_count);
         double q_stdev = computeStdev((double)mean_system_length, (double)mean_system_length_pow2, monitor_event_count);
         double wt_stdev = computeStdev(mean_queue_time, mean_queue_time_pow2, death_event_count);
