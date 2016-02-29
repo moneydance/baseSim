@@ -33,10 +33,10 @@ public abstract class Statistics
 
     public void writeStats()
     {
-        System.setOut(log_out_stream);
-        System.out.println("Monitor Event Number: " + monitor_event_count);
-        printStats();
-        System.setOut(print_out_stream);
+        //System.setOut(log_out_stream);
+       // System.out.println("Monitor Event Number: " + monitor_event_count);
+        //printStats();
+       // System.setOut(print_out_stream);
     }
 
     protected double computeStdev(double values, double values_pow2, int count)
