@@ -13,6 +13,7 @@ public class ServerMMOneK extends Server
     private Task current_task;
     private double mu;
     private double lambda;
+    private double monitor_rate;
     int k;
     int requests;
     int accepted_requests;
@@ -28,6 +29,7 @@ public class ServerMMOneK extends Server
         this.mu = mu;
         this.lambda = lambda;
         this.k = k;
+        this.monitor_rate = lambda * .02;
     }
 
     private void enqueue(Task t)
@@ -38,7 +40,6 @@ public class ServerMMOneK extends Server
             queue_length++;
             accepted_requests++;
         }
-        requests++;
     }
 
     private Task dequeue()
@@ -68,10 +69,12 @@ public class ServerMMOneK extends Server
 
     public List<Event> arrival(Event event, double clock)
     {
+        requests++;
         List<Event> new_events = new ArrayList<Event>();
         Task arriving_task = event.getTask();
         if (queue_length==0 && current_task==null)
         {
+            accepted_requests++;
             arriving_task.updateWaitTime(clock);
             current_task = arriving_task;
             new_events.add(new EventDeath(arriving_task, Event.nextExponential(mu), clock));
@@ -93,5 +96,12 @@ public class ServerMMOneK extends Server
         }
         current_task = null;
         return null;
+    }
+
+    public Event monitor(double clock){
+        stats.recordLengths(getQueueLength(), getSystemLength());
+        stats.recordAcceptance(getAcceptanceProbability());
+        stats.writeStats(clock);
+        return new EventMonitor(monitor_rate, clock);
     }
 }

@@ -5,50 +5,35 @@ import serverpackage.eventpackage.*;
 import java.util.List;
 import java.util.PriorityQueue;
 
-interface SimulateInterface
-{
-    public void run();
-}
-
 public class ServerMMOneSimulate extends Simulate
 {
     private PriorityQueue<Event> calander;
     private double max_time;
     private ServerMMOne server;
     private double clock;
-    public double monitor_rate;
 
     public ServerMMOneSimulate(double lambda, double ts, double max_time, boolean record_logs)
     {
         clock = 0.0;
-        monitor_rate = lambda * .02;
         calander = new PriorityQueue<Event>();
         server = new ServerMMOne(lambda, 1/ts, record_logs);
-        this.max_time = max_time;
         calander.add(new EventBirth(lambda, clock));
+        calander.add(new EventMonitor(lambda * .02, max_time));
+        this.max_time = max_time;
     }
 
     public void run()
     {
-        Boolean collect_stats = false;
-        while(clock<max_time)
+        while(clock<max_time * 2)
         {
             Event current_event = calander.poll();
             clock = current_event.getTimeStamp();
-            resolveEvent(current_event, collect_stats);
-        }
-        collect_stats = true;
-        calander.add(new EventMonitor(monitor_rate, clock));
-        while(clock<2*max_time)
-        {
-            Event current_event = calander.poll();
-            clock = current_event.getTimeStamp();
-            resolveEvent(current_event, collect_stats);
+            resolveEvent(current_event);
         }
         server.stats.printStats(clock);
     }
 
-    private void resolveEvent(Event current_event, Boolean collect_stats)
+    private void resolveEvent(Event current_event)
     {
         if (current_event instanceof EventBirth)
         {
@@ -56,7 +41,8 @@ public class ServerMMOneSimulate extends Simulate
            addEvents(new_events);
         }
         else if (current_event instanceof EventDeath)
-        {   if (collect_stats)
+        {
+            if (clock > max_time)
                 server.stats.recordTimes(current_event.getTask());
             Event new_death_event = server.departure(clock);
             if (new_death_event != null)
@@ -64,11 +50,8 @@ public class ServerMMOneSimulate extends Simulate
         }
         else if (current_event instanceof EventMonitor)
         {
-            int queue_length = server.getQueueLength();
-            int system_length = server.getSystemLength();
-            server.stats.recordLengths(queue_length, system_length);
-            calander.add(new EventMonitor(monitor_rate, clock));
-            server.stats.writeStats(clock);
+            Event new_monitor = server.monitor(clock);
+            calander.add(new_monitor);
         }
     }
 
