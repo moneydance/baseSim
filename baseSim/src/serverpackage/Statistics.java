@@ -38,10 +38,10 @@ public abstract class Statistics
     {
         if (collect_logs)
         {
-        System.setOut(log_out_stream);
-        System.out.println("Monitor Event Number: " + monitor_event_count);
-        printStats(clock);
-        System.setOut(print_out_stream);
+            System.setOut(log_out_stream);
+            System.out.println("Monitor Event Number: " + monitor_event_count);
+            printStats(clock);
+            System.setOut(print_out_stream);
         }
     }
 
