@@ -1,4 +1,4 @@
-package servermmonepackage;
+package servermmonekpackage;
 
 import serverpackage.*;
 import serverpackage.eventpackage.*;
@@ -10,20 +10,20 @@ interface SimulateInterface
     public void run();
 }
 
-public class ServerMMOneSimulate extends Simulate
+public class ServerMMOneKSimulate extends Simulate
 {
     private PriorityQueue<Event> calander;
     private double max_time;
-    private ServerMMOne server;
+    private ServerMMOneK server;
     private double clock;
     public double monitor_rate;
 
-    public ServerMMOneSimulate(double lambda, double ts, double max_time, boolean record_logs)
+    public ServerMMOneKSimulate(double lambda, double ts, double max_time, int k, boolean record_logs)
     {
         clock = 0.0;
         monitor_rate = lambda * .02;
         calander = new PriorityQueue<Event>();
-        server = new ServerMMOne(lambda, 1/ts, record_logs);
+        server = new ServerMMOneK(lambda, 1/ts,k , record_logs);
         this.max_time = max_time;
         calander.add(new EventBirth(lambda, clock));
     }
@@ -66,6 +66,8 @@ public class ServerMMOneSimulate extends Simulate
         {
             int queue_length = server.getQueueLength();
             int system_length = server.getSystemLength();
+            double acceptance_probs = server.getAcceptanceProbability();
+            server.stats.recordAcceptance(acceptance_probs);
             server.stats.recordLengths(queue_length, system_length);
             calander.add(new EventMonitor(monitor_rate, clock));
             server.stats.writeStats(clock);

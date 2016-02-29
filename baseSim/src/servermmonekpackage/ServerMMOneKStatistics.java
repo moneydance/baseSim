@@ -15,13 +15,13 @@ public class ServerMMOneKStatistics extends Statistics
     private double mean_system_time_pow2;
     private double mean_system_length_pow2;
     private double total_service_time;
+    private double acceptance_probability;
     private double z_score;
 
-    public ServerMMOneKStatistics(String server_type)
+    public ServerMMOneKStatistics(String server_type, boolean collect_logs)
     {
-        super(server_type);
+        super(server_type, collect_logs);
         death_event_count = 0;
-        monitor_event_count = 0;
         mean_queue_length = 0.0;
         mean_queue_time = 0.0;
         mean_system_time = 0.0;
@@ -31,7 +31,12 @@ public class ServerMMOneKStatistics extends Statistics
         mean_system_time_pow2 = 0;
         mean_queue_length_pow2 = 0;
         mean_system_length_pow2 = 0;
+        acceptance_probability = 0;
         z_score = 3.31;
+    }
+
+    public void recordAcceptance(double acceptance_probability){
+        this.acceptance_probability = acceptance_probability;
     }
 
     public void recordTimes(Task task)
@@ -56,15 +61,15 @@ public class ServerMMOneKStatistics extends Statistics
         monitor_event_count++;
     }
 
-    public void printStats()
+    public void printStats(double clock)
     {
         System.out.println("===================================================");
-        System.out.println("CLOCK: " + Simulate.CLOCK/2);
+        System.out.println("CLOCK: " + clock/2);
         System.out.println("W: " + mean_queue_length/(double)monitor_event_count);
         System.out.println("Q: " + mean_system_length/(double)monitor_event_count);
         System.out.println("Wt: " + mean_queue_time/death_event_count);
         System.out.println("Qt: " + mean_system_time/death_event_count);
-        System.out.println("Rho: " + total_service_time/(Simulate.CLOCK/2.0));
+        System.out.println("Rho: " + total_service_time/(clock/2.0));
         double w_stdev = computeStdev((double)mean_queue_length, (double)mean_queue_length_pow2, monitor_event_count);
         double q_stdev = computeStdev((double)mean_system_length, (double)mean_system_length_pow2, monitor_event_count);
         double wt_stdev = computeStdev(mean_queue_time, mean_queue_time_pow2, death_event_count);
@@ -77,6 +82,7 @@ public class ServerMMOneKStatistics extends Statistics
         System.out.println("Q Confidence Interval: " + confidenceInterval(q_stdev, z_score, monitor_event_count));
         System.out.println("Wt Confidence Interval: " + confidenceInterval(wt_stdev, z_score, death_event_count));
         System.out.println("Qt Confidence Interval: " + confidenceInterval(qt_stdev, z_score, death_event_count));
+        System.out.println("Acceptance Probability: " + acceptance_probability);
         System.out.println("Monitors through system: " + monitor_event_count);
         System.out.println("Tasks through system: " + death_event_count);
         System.out.println("===================================================");

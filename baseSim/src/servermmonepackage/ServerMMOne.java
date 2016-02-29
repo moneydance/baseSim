@@ -13,13 +13,14 @@ public class ServerMMOne extends Server
     private Task current_task;
     private double mu;
     private double lambda;
-
-    public ServerMMOne(double lambda, double mu)
+    public ServerMMOneStatistics stats;
+    public ServerMMOne(double lambda, double mu, boolean record_logs)
     {
         task_queue = new LinkedList<Task>();
         queue_length = 0;
         this.mu = mu;
         this.lambda = lambda;
+        stats = new ServerMMOneStatistics(getServerType(), record_logs);
     }
 
     private void enqueue(Task t)
