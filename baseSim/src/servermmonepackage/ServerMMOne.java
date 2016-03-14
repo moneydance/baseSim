@@ -82,9 +82,9 @@ public class ServerMMOne extends Server
         return null;
     }
 
-    public Event monitor(double clock){
+    public Event monitor(double clock, double max_time){
         stats.recordLengths(getQueueLength(), getSystemLength());
-        stats.writeStats(clock);
+        stats.writeStats(clock, max_time);
         return new EventMonitor(monitor_rate, clock);
     }
 }

@@ -1,23 +1,24 @@
-package servermmonekpackage;
+package servermultipackage;
 
 import serverpackage.*;
+import servermultipackage.multieventpackage.*;
 import serverpackage.eventpackage.*;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class ServerMMOneKSimulate extends Simulate
+public class MultiServerSimulate extends Simulate
 {
     private PriorityQueue<Event> calander;
     private double max_time;
-    private ServerMMOneK server;
+    private MultiServer server;
     private double clock;
 
-    public ServerMMOneKSimulate(double lambda, double ts, double max_time, int k, boolean record_logs)
+    public MultiServerSimulate(double lambda, double max_time, boolean record_logs)
     {
         clock = 0.0;
         calander = new PriorityQueue<Event>();
-        server = new ServerMMOneK(lambda, 1/ts, k, record_logs);
-        calander.add(new EventBirth(lambda, clock));
+        server = new MultiServer(lambda, record_logs);
+        calander.add(new MultiEventBirth(Event.nextExponential(lambda), clock, 0));
         calander.add(new EventMonitor(lambda * .02, max_time));
         this.max_time = max_time;
     }
@@ -31,6 +32,7 @@ public class ServerMMOneKSimulate extends Simulate
             resolveEvent(current_event);
         }
         server.stats.printStats(clock, max_time);
+        server.printSubServerStats(clock, max_time);
     }
 
     private void resolveEvent(Event current_event)
@@ -41,11 +43,10 @@ public class ServerMMOneKSimulate extends Simulate
            addEvents(new_events);
         }
         else if (current_event instanceof EventDeath)
-        {   if (clock > max_time)
-                server.stats.recordTimes(current_event.getTask());
-            Event new_death_event = server.departure(clock);
-            if (new_death_event != null)
-                calander.add(new_death_event);
+        {
+            boolean record_stats = (clock > max_time);
+            List<Event> new_events = server.departure(current_event, clock, record_stats);
+            addEvents(new_events);
         }
         else if (current_event instanceof EventMonitor)
         {
@@ -56,7 +57,13 @@ public class ServerMMOneKSimulate extends Simulate
 
     private void addEvents(List<Event> new_events)
     {
-        for (Event event : new_events)
-            calander.add(event);
+        if (new_events != null)
+        {
+            for (Event event : new_events)
+            {
+                if (event != null)
+                    calander.add(event);
+            }
+        }
     }
 }

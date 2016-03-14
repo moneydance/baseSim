@@ -1,22 +1,22 @@
-package servermmonekpackage;
+package servermdonekpackage;
 
 import serverpackage.*;
 import serverpackage.eventpackage.*;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class ServerMMOneKSimulate extends Simulate
+public class ServerMDOneKSimulate extends Simulate
 {
     private PriorityQueue<Event> calander;
     private double max_time;
-    private ServerMMOneK server;
+    private ServerMDOneK server;
     private double clock;
 
-    public ServerMMOneKSimulate(double lambda, double ts, double max_time, int k, boolean record_logs)
+    public ServerMDOneKSimulate(double lambda, double ts, double max_time, int k, boolean record_logs)
     {
         clock = 0.0;
         calander = new PriorityQueue<Event>();
-        server = new ServerMMOneK(lambda, 1/ts, k, record_logs);
+        server = new ServerMDOneK(lambda, ts, k, record_logs);
         calander.add(new EventBirth(lambda, clock));
         calander.add(new EventMonitor(lambda * .02, max_time));
         this.max_time = max_time;

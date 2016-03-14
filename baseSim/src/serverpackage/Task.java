@@ -29,4 +29,8 @@ public class Task {
     {
         return wait_time;
     }
+    public double getArrivalTime()
+    {
+        return arrival_time;
+    }
 }

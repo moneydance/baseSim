@@ -32,15 +32,15 @@ public abstract class Statistics
 
     abstract public void recordTimes(Task task);
     abstract public void recordLengths(int queue_length, int system_length);
-    abstract public void printStats(double clock);
+    abstract public void printStats(double clock, double max_time);
 
-    public void writeStats(double clock)
+    public void writeStats(double clock, double max_time)
     {
         if (collect_logs)
         {
             System.setOut(log_out_stream);
             System.out.println("Monitor Event Number: " + monitor_event_count);
-            printStats(clock);
+            printStats(clock, max_time);
             System.setOut(print_out_stream);
         }
     }

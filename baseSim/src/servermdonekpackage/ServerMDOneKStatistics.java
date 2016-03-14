@@ -1,9 +1,9 @@
-package servermmonepackage;
+package servermdonekpackage;
 
 import serverpackage.*;
 import java.lang.Math;
 
-public class ServerMMOneStatistics extends Statistics
+public class ServerMDOneKStatistics extends Statistics
 {
     private int death_event_count;
     private double mean_queue_length;
@@ -15,9 +15,10 @@ public class ServerMMOneStatistics extends Statistics
     private double mean_system_time_pow2;
     private double mean_system_length_pow2;
     private double total_service_time;
+    private double acceptance_probability;
     private double z_score;
 
-    public ServerMMOneStatistics(String server_type, boolean collect_logs)
+    public ServerMDOneKStatistics(String server_type, boolean collect_logs)
     {
         super(server_type, collect_logs);
         death_event_count = 0;
@@ -30,7 +31,13 @@ public class ServerMMOneStatistics extends Statistics
         mean_system_time_pow2 = 0;
         mean_queue_length_pow2 = 0;
         mean_system_length_pow2 = 0;
-        z_score = 3.31;
+        acceptance_probability = 0;
+        z_score = 1.96;
+    }
+
+    public void recordAcceptance(double acceptance_probability)
+    {
+        this.acceptance_probability = acceptance_probability;
     }
 
     public void recordTimes(Task task)
@@ -76,6 +83,7 @@ public class ServerMMOneStatistics extends Statistics
         System.out.println("Q Confidence Interval: " + confidenceInterval(q_stdev, z_score, monitor_event_count));
         System.out.println("Wt Confidence Interval: " + confidenceInterval(wt_stdev, z_score, death_event_count));
         System.out.println("Qt Confidence Interval: " + confidenceInterval(qt_stdev, z_score, death_event_count));
+        System.out.println("Acceptance Probability: " + acceptance_probability);
         System.out.println("Monitors through system: " + monitor_event_count);
         System.out.println("Tasks through system: " + death_event_count);
         System.out.println("===================================================");

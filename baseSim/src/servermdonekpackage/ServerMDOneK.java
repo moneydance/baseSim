@@ -1,4 +1,4 @@
-package servermmonekpackage;
+package servermdonekpackage;
 
 import serverpackage.*;
 import serverpackage.eventpackage.*;
@@ -6,27 +6,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
 
-public class ServerMMOneK extends Server
+public class ServerMDOneK extends Server
 {
     private LinkedList<Task> task_queue;
     private int queue_length;
     private Task current_task;
-    private double mu;
+    private double ts;
     private double lambda;
     private double monitor_rate;
     int k;
     int requests;
     int accepted_requests;
-    public ServerMMOneKStatistics stats;
+    public ServerMDOneKStatistics stats;
 
-    public ServerMMOneK(double lambda, double mu, int k, boolean record_logs)
+    public ServerMDOneK(double lambda, double ts, int k, boolean record_logs)
     {
         task_queue = new LinkedList<Task>();
         queue_length = 0;
         requests = 0;
         accepted_requests = 0;
-        stats = new ServerMMOneKStatistics(getServerType(), record_logs);
-        this.mu = mu;
+        stats = new ServerMDOneKStatistics(getServerType(), record_logs);
+        this.ts = ts;
         this.lambda = lambda;
         this.k = k;
         this.monitor_rate = lambda * .02;
@@ -77,7 +77,7 @@ public class ServerMMOneK extends Server
             accepted_requests++;
             arriving_task.updateWaitTime(clock);
             current_task = arriving_task;
-            new_events.add(new EventDeath(arriving_task, Event.nextExponential(mu), clock));
+            new_events.add(new EventDeath(arriving_task, ts, clock));
         }
         else
             enqueue(arriving_task);
@@ -92,13 +92,14 @@ public class ServerMMOneK extends Server
             Task departing_task = dequeue();
             departing_task.updateWaitTime(clock);
             current_task = departing_task;
-            return new EventDeath(departing_task, Event.nextExponential(mu), clock);
+            return new EventDeath(departing_task, ts, clock);
         }
         current_task = null;
         return null;
     }
 
-    public Event monitor(double clock, double max_time){
+    public Event monitor(double clock, double max_time)
+    {
         stats.recordLengths(getQueueLength(), getSystemLength());
         stats.recordAcceptance(getAcceptanceProbability());
         stats.writeStats(clock, max_time);

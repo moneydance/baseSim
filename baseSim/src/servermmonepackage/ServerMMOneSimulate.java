@@ -30,7 +30,7 @@ public class ServerMMOneSimulate extends Simulate
             clock = current_event.getTimeStamp();
             resolveEvent(current_event);
         }
-        server.stats.printStats(clock);
+        server.stats.printStats(clock, max_time);
     }
 
     private void resolveEvent(Event current_event)
@@ -50,7 +50,7 @@ public class ServerMMOneSimulate extends Simulate
         }
         else if (current_event instanceof EventMonitor)
         {
-            Event new_monitor = server.monitor(clock);
+            Event new_monitor = server.monitor(clock, max_time);
             calander.add(new_monitor);
         }
     }
